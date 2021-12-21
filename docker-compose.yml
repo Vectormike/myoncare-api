@@ -11,11 +11,11 @@ services:
     ports: 
       - 3001:3001
     environment:
-      - DB_HOST=$DB_HOST
-      - DB_USER=$DB_USER
-      - DB_PASSWORD=$DB_PASSWORD
-      - DB_NAME=$DB_NAME
-      - DB_PORT=$DB_PORT
+      - DB_HOST=localhost
+      - DB_USER=root
+      - DB_PASSWORD=root
+      - DB_NAME=myoncare
+      - DB_PORT=8889
     volumes:
       - .:/usr/src/app
 
@@ -23,11 +23,13 @@ services:
     container_name: db-node-mysql
     env_file: ./.env
     environment:
-      - MYSQL_ROOT_PASSWORD=$DB_PASSWORD
-      - MYSQL_DATABASE=$DB_NAME
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=myoncare
+    expose:
+      - 3306
     image: mysql:8.0
     ports:
-      - 3306:3306
+      - 8889:3306
     restart: always
     volumes: 
       - db-config:/etc/mysql

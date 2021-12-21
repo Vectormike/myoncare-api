@@ -39,7 +39,7 @@ passport.use('jwt', jwtStrategy);
 // api routes
 app.use('/', routes);
 
-app.get('/ping', (req, res) => res.send('Ping Pong!'));
+app.get('/ping', (req, res) => res.send('Pong!'));
 
 // convert error to ApiError, if needed
 app.use(errorConverter);
