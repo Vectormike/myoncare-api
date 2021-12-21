@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  api:
+    build: .
+    container_name: doc_container_2
+    command: npm run start
+    env_file: ./.env
+    depends_on:
+      - mysqldb
+    ports: 
+      - 3001:3001
+    environment:
+      - DB_HOST=$DB_HOST
+      - DB_USER=$DB_USER
+      - DB_PASSWORD=$DB_PASSWORD
+      - DB_NAME=$DB_NAME
+      - DB_PORT=$DB_PORT
+    volumes:
+      - .:/usr/src/app
+
+  mysqldb:
+    container_name: db-node-mysql
+    env_file: ./.env
+    environment:
+      - MYSQL_ROOT_PASSWORD=$DB_PASSWORD
+      - MYSQL_DATABASE=$DB_NAME
+    image: mysql:8.0
+    ports:
+      - 3306:3306
+    restart: always
+    volumes: 
+      - db-config:/etc/mysql
+      - db-data:/var/lib/mysql
+      - ./db/backup/files/:/data_backup/
+
+volumes: 
+  db-config:
+  db-data:
