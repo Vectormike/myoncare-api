@@ -2,39 +2,56 @@ version: '3.8'
 
 services:
   api:
-    build: .
+    build:
+      context: .
     container_name: doc_container_2
-    command: npm run start
-    env_file: ./.env
     depends_on:
-      - mysqldb
-    ports: 
-      - 3001:3001
+      - mysql
+    restart: always
     environment:
-      - DB_HOST=localhost
+      - PORT=3001
+      - JWT_SECRET=p4sta.w1th-b0logn3s3-s@uce
+      - JWT_ALGO=HS256
+      - DB_HOST=mysql
       - DB_USER=root
       - DB_PASSWORD=root
       - DB_NAME=myoncare
-      - DB_PORT=8889
-    volumes:
-      - .:/usr/src/app
+      - DB_PORT=3306
+    networks:
+      - elk
+    ports: 
+      - 3001:3001
 
-  mysqldb:
-    container_name: db-node-mysql
-    env_file: ./.env
-    environment:
-      - MYSQL_ROOT_PASSWORD=root
-      - MYSQL_DATABASE=myoncare
-    expose:
-      - 3306
-    image: mysql:8.0
+  mysql:
+    image: mysql/mysql-server:latest
+    container_name: mysql
     ports:
-      - 8889:3306
+      - 3306:3306
+    expose:
+      # Opens port 3306 on the container
+      - "3306"
+    command: --innodb_use_native_aio=0 --socket=/tmp/mysql.sock --bind_address=0.0.0.0
+    volumes:
+      - ./mysqlDb:/var/lib/mysql
+    environment:
+      MYSQL_HOST: "mysql"
+      MYSQL_ROOT_PASSWORD: "root"
+      MYSQL_DATABASE: "myoncare"
+      DATABASE_HOST: mysql
+      MYSQL_PASSWORD: "root"
+      MYSQL_LOG_CONSOLE: "true"
     restart: always
-    volumes: 
-      - db-config:/etc/mysql
-      - db-data:/var/lib/mysql
-      - ./db/backup/files/:/data_backup/
+    networks:
+      - elk
+    healthcheck:
+      test: ["CMD", "curl", "-fk", "tcp://localhost:3306"]
+      interval: 300s
+      timeout: 400s
+      retries: 10
+
+networks:
+  elk:
+    driver: bridge
 
 volumes: 
   db-config:

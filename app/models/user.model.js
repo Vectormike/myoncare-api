@@ -17,6 +17,14 @@ const User = sequelize.define('user', {
     type: DataTypes.STRING,
     allowNull: false,
   },
+  token: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
 });
 
 module.exports = User;
+
+// User.methods.generateHash = function (password) {
+//   return bcrypt.hashSync(password, bcrypt.genSaltSync(8), null);
+// };

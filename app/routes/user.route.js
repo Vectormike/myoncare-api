@@ -10,5 +10,6 @@ router.post('/register', validate(userValidation.register), userController.regis
 router.post('/login', validate(userValidation.login), userController.login);
 router.patch('/update/:id', isAuth, userController.updateUser);
 router.delete('/delete/:id', isAuth, userController.deleteUser);
+router.get('/', userController.fetchUsers);
 
 module.exports = router;

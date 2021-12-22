@@ -13,7 +13,6 @@ const jwt = require('jsonwebtoken');
 const createUser = async (userBody) => {
   // Check if email exists
   const emailExists = await User.findOne({ where: { email: userBody.email } });
-  console.log(User, 'Hi');
   if (emailExists) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'This email address exists 🥲');
   }
@@ -26,10 +25,12 @@ const createUser = async (userBody) => {
     password,
   });
 
-  return {
-    newUser,
-    token: generateJWT(newUser),
-  };
+  const token = generateJWT(newUser);
+  await User.update({ token }, { where: { id: newUser.id } });
+
+  const user = await User.findOne({ where: { id: newUser.id } });
+
+  return user;
 };
 
 /**
@@ -40,18 +41,22 @@ const createUser = async (userBody) => {
  */
 const loginUserWithEmailAndPassword = async (email, password) => {
   // Check if email exists
-  const userExists = await User.findOne({ where: { email } });
-  if (!userExists) {
+  const response = await User.findOne({ where: { email } });
+  if (!response) {
     throw new ApiError(httpStatus.BAD_REQUEST, `This user doesn't exists 🥲`);
   }
 
   // Check if password match
-  const passwordMatch = bcrypt.compare(password, userExists.password);
-  if (passwordMatch === false) {
+  const passwordMatch = await bcrypt.compare(password, response.password);
+  if (!passwordMatch) {
     throw new ApiError(httpStatus.UNAUTHORIZED, 'Incorrect email or password');
   }
 
-  const user = { userExists, token: generateJWT(userExists) };
+  const token = generateJWT(response);
+
+  await User.update({ token }, { where: { id: response.id } });
+
+  const user = await User.findOne({ where: { id: response.id } });
 
   return user;
 };
@@ -70,7 +75,9 @@ const updateUser = async (userId, updateBody) => {
   }
   await User.update(updateBody, { where: { id: userExists.id } });
 
-  return userExists;
+  const user = await User.findOne({ where: { id: userExists.id } });
+
+  return user;
 };
 
 const deleteUser = async (userId) => {
@@ -81,6 +88,11 @@ const deleteUser = async (userId) => {
   }
   await User.destroy({ where: { id: userId } });
   return userExists;
+};
+
+const fetchUsers = async () => {
+  const users = await User.findAll();
+  return users;
 };
 
 const generateJWT = (user) => {
@@ -95,4 +107,4 @@ const generateJWT = (user) => {
   );
 };
 
-module.exports = { createUser, loginUserWithEmailAndPassword, updateUser, deleteUser };
+module.exports = { createUser, loginUserWithEmailAndPassword, updateUser, deleteUser, fetchUsers };

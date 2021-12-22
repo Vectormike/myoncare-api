@@ -3,8 +3,8 @@ const catchAsync = require('../../utils/catchAsync');
 const userService = require('../services/user.service');
 
 const register = catchAsync(async (req, res) => {
-  const { newUser, token } = await userService.createUser(req.body);
-  res.status(httpStatus.CREATED).send({ newUser, token });
+  const user = await userService.createUser(req.body);
+  res.status(httpStatus.CREATED).send({ user });
 });
 
 const login = catchAsync(async (req, res) => {
@@ -23,9 +23,15 @@ const deleteUser = catchAsync(async (req, res) => {
   res.status(httpStatus.NO_CONTENT).send();
 });
 
+const fetchUsers = catchAsync(async (req, res) => {
+  const users = await userService.fetchUsers();
+  res.send(users);
+});
+
 module.exports = {
   register,
   login,
   updateUser,
   deleteUser,
+  fetchUsers,
 };
